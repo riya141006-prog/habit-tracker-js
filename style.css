@@ -1,0 +1,756 @@
+/* ==========================================================================
+   RITUAL — HABIT TRACKER STYLES
+   Organized in sections:
+   1. CSS Variables (theme colors for light & dark mode)
+   2. Reset & base styles
+   3. Background decoration
+   4. Layout / header
+   5. Glass card component
+   6. Progress ring + bar
+   7. Add habit form
+   8. Habit list + items
+   9. Modal (edit habit)
+   10. Toast notifications
+   11. Animations
+   12. Responsive (mobile) rules
+   ========================================================================== */
+
+/* ---------- 1. CSS VARIABLES ---------- */
+/* We define colors as variables so switching to dark mode is just swapping
+   these values on the <body> element (see .dark-mode below). */
+:root {
+  /* Brand palette */
+  --accent-violet: #8b5cf6;
+  --accent-teal: #22d3aa;
+  --accent-teal-glow: rgba(34, 211, 170, 0.35);
+  --accent-danger: #f87171;
+
+  /* Light mode (default) */
+  --bg-base: #eef0ff;
+  --bg-gradient-a: #dfe3ff;
+  --bg-gradient-b: #eafff8;
+  --text-primary: #1c1b29;
+  --text-secondary: #5b5a72;
+  --glass-bg: rgba(255, 255, 255, 0.45);
+  --glass-border: rgba(255, 255, 255, 0.65);
+  --glass-shadow: rgba(90, 90, 150, 0.15);
+  --input-bg: rgba(255, 255, 255, 0.6);
+  --track-bg: rgba(0, 0, 0, 0.08);
+}
+
+/* Dark mode overrides — applied when <body> has class "dark-mode" */
+body.dark-mode {
+  --bg-base: #0b0f1a;
+  --bg-gradient-a: #161329;
+  --bg-gradient-b: #0d1f22;
+  --text-primary: #f2f1fb;
+  --text-secondary: #a3a1bd;
+  --glass-bg: rgba(255, 255, 255, 0.06);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-shadow: rgba(0, 0, 0, 0.45);
+  --input-bg: rgba(255, 255, 255, 0.07);
+  --track-bg: rgba(255, 255, 255, 0.08);
+}
+
+/* ---------- 2. RESET & BASE ---------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Inter", sans-serif;
+  color: var(--text-primary);
+  background: var(--bg-base);
+  min-height: 100vh;
+  overflow-x: hidden;
+  /* Smooth transition whenever theme variables change */
+  transition: background 0.4s ease, color 0.4s ease;
+}
+
+h1, h2, h3 {
+  font-family: "Sora", sans-serif;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+input, select {
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+/* ---------- 3. BACKGROUND DECORATION ---------- */
+/* Large soft blurred circles that float behind the glass UI.
+   This is what makes glassmorphism actually visible/interesting. */
+.bg-blob {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(70px);
+  z-index: -1;
+  opacity: 0.6;
+  animation: float 12s ease-in-out infinite;
+}
+
+.blob-1 {
+  width: 380px;
+  height: 380px;
+  top: -80px;
+  left: -100px;
+  background: var(--bg-gradient-a);
+}
+
+.blob-2 {
+  width: 420px;
+  height: 420px;
+  bottom: -120px;
+  right: -100px;
+  background: var(--bg-gradient-b);
+  animation-delay: -4s;
+}
+
+.blob-3 {
+  width: 300px;
+  height: 300px;
+  top: 40%;
+  left: 50%;
+  background: var(--accent-teal-glow);
+  animation-delay: -8s;
+  opacity: 0.25;
+}
+
+@keyframes float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(30px, -30px) scale(1.08); }
+}
+
+/* ---------- 4. LAYOUT / HEADER ---------- */
+.app {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 32px 20px 60px;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  animation: fadeSlideDown 0.6s ease both;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-mark {
+  font-size: 2rem;
+  color: var(--accent-violet);
+}
+
+.brand h1 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.tagline {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+/* Circular theme toggle button */
+.theme-toggle {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.theme-toggle:hover {
+  transform: scale(1.08) rotate(-10deg);
+}
+
+/* ---------- 5. GLASS CARD COMPONENT ---------- */
+/* The core "glassmorphism" look: translucent background, blur, soft border,
+   and a subtle shadow that gives it depth. Reused across the app. */
+.glass {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px var(--glass-shadow);
+  transition: background 0.4s ease, border 0.4s ease, box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+/* ---------- 6. PROGRESS RING + BAR ---------- */
+.progress-card {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 24px;
+  margin-bottom: 20px;
+  animation: fadeSlideUp 0.6s ease 0.05s both;
+}
+
+.progress-ring-wrap {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
+}
+
+.progress-ring {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg); /* start the ring from the top */
+}
+
+.ring-track {
+  fill: none;
+  stroke: var(--track-bg);
+  stroke-width: 10;
+}
+
+.ring-fill {
+  fill: none;
+  stroke: url(#none); /* fallback, overridden below with solid color */
+  stroke: var(--accent-teal);
+  stroke-width: 10;
+  stroke-linecap: round;
+  /* circumference = 2 * PI * r(52) ≈ 326.7 — used for the dash animation */
+  stroke-dasharray: 326.7;
+  stroke-dashoffset: 326.7;
+  transition: stroke-dashoffset 0.7s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.ring-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.ring-label span {
+  font-family: "Sora", sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.ring-label small {
+  color: var(--text-secondary);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.progress-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.progress-info h2 {
+  font-size: 1.1rem;
+  margin-bottom: 4px;
+}
+
+#progressText {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  margin-bottom: 12px;
+}
+
+.progress-bar-track {
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--track-bg);
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent-violet), var(--accent-teal));
+  transition: width 0.6s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.stats-row {
+  display: flex;
+  gap: 10px;
+}
+
+.stat-pill {
+  flex: 1;
+  text-align: center;
+  background: var(--input-bg);
+  border-radius: 12px;
+  padding: 8px 6px;
+}
+
+.stat-pill strong {
+  display: block;
+  font-family: "Sora", sans-serif;
+  font-size: 1.1rem;
+}
+
+.stat-pill span {
+  font-size: 0.68rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* ---------- 7. ADD HABIT FORM ---------- */
+.add-habit-card {
+  padding: 18px;
+  margin-bottom: 28px;
+  animation: fadeSlideUp 0.6s ease 0.1s both;
+}
+
+.habit-form {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.habit-input,
+.habit-icon-select {
+  background: var(--input-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  color: var(--text-primary);
+  outline: none;
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.habit-input {
+  flex: 1;
+  min-width: 160px;
+}
+
+.habit-input:focus,
+.habit-icon-select:focus {
+  border-color: var(--accent-violet);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent-violet), #6d28d9);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-weight: 600;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.35);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.45);
+}
+
+.btn-primary:active {
+  transform: translateY(0px) scale(0.97);
+}
+
+.btn-secondary {
+  background: var(--input-bg);
+  color: var(--text-primary);
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-weight: 600;
+  border: 1px solid var(--glass-border);
+  transition: background 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background: var(--track-bg);
+}
+
+/* ---------- 8. HABIT LIST ---------- */
+.list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.list-header h2 {
+  font-size: 1.1rem;
+}
+
+.filter-tabs {
+  display: flex;
+  gap: 6px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  padding: 4px;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+}
+
+.filter-tab {
+  padding: 6px 12px;
+  border-radius: 9px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.filter-tab.active {
+  background: var(--accent-violet);
+  color: #fff;
+}
+
+.habit-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Each habit row is its own glass card */
+.habit-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  animation: fadeSlideUp 0.4s ease both;
+}
+
+.habit-item.completed {
+  border-color: var(--accent-teal-glow);
+}
+
+/* Custom circular checkbox */
+.habit-check {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid var(--accent-teal);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  transition: background 0.25s ease, transform 0.2s ease;
+}
+
+.habit-check:hover {
+  transform: scale(1.1);
+}
+
+.habit-check.checked {
+  background: var(--accent-teal);
+  animation: pop 0.35s ease;
+}
+
+.habit-check svg {
+  width: 16px;
+  height: 16px;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.habit-check.checked svg {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.habit-icon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.habit-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.habit-name {
+  font-weight: 600;
+  font-size: 0.98rem;
+  word-break: break-word;
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+
+.habit-item.completed .habit-name {
+  color: var(--text-secondary);
+  text-decoration: line-through;
+  text-decoration-color: var(--accent-teal);
+}
+
+.habit-streak {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.habit-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.icon-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+
+.icon-btn:hover {
+  background: var(--track-bg);
+  transform: translateY(-1px);
+}
+
+.icon-btn.delete-btn:hover {
+  color: var(--accent-danger);
+}
+
+.icon-btn.edit-btn:hover {
+  color: var(--accent-violet);
+}
+
+/* Removal animation applied via JS before deleting from DOM */
+.habit-item.removing {
+  animation: fadeSlideOut 0.3s ease forwards;
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 50px 20px;
+  color: var(--text-secondary);
+  display: none; /* shown via JS when list is empty */
+}
+
+.empty-state.visible {
+  display: block;
+  animation: fadeSlideUp 0.4s ease both;
+}
+
+.empty-emoji {
+  font-size: 2.4rem;
+  margin-bottom: 10px;
+}
+
+.empty-state h3 {
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.app-footer {
+  text-align: center;
+  margin-top: 40px;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+/* ---------- 9. MODAL (EDIT HABIT) ---------- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 20, 0.45);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+  z-index: 100;
+}
+
+.modal-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-box {
+  width: 100%;
+  max-width: 380px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transform: translateY(20px) scale(0.96);
+  transition: transform 0.25s ease;
+}
+
+.modal-overlay.open .modal-box {
+  transform: translateY(0) scale(1);
+}
+
+.modal-box h3 {
+  margin-bottom: 4px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+/* ---------- 10. TOAST NOTIFICATIONS ---------- */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 200;
+  width: 100%;
+  max-width: 360px;
+  padding: 0 16px;
+}
+
+.toast {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(16px);
+  color: var(--text-primary);
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 8px 24px var(--glass-shadow);
+  animation: toastIn 0.35s ease both, toastOut 0.35s ease 2.65s both;
+  border-left: 3px solid var(--accent-teal);
+}
+
+.toast.error {
+  border-left-color: var(--accent-danger);
+}
+
+.toast.info {
+  border-left-color: var(--accent-violet);
+}
+
+/* ---------- 11. ANIMATIONS ---------- */
+@keyframes fadeSlideDown {
+  from { opacity: 0; transform: translateY(-14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeSlideOut {
+  to { opacity: 0; transform: translateX(30px) scale(0.95); }
+}
+
+@keyframes pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes toastOut {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-10px); }
+}
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ---------- 12. RESPONSIVE / MOBILE ---------- */
+@media (max-width: 600px) {
+  .app {
+    padding: 20px 14px 40px;
+  }
+
+  .brand h1 {
+    font-size: 1.35rem;
+  }
+
+  .progress-card {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .stats-row {
+    width: 100%;
+  }
+
+  .habit-form {
+    flex-direction: column;
+  }
+
+  .habit-icon-select {
+    width: 100%;
+  }
+
+  .btn-primary {
+    width: 100%;
+    text-align: center;
+  }
+
+  .list-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .habit-item {
+    padding: 12px;
+  }
+
+  .habit-actions {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 380px) {
+  .ring-label span {
+    font-size: 1.2rem;
+  }
+}
