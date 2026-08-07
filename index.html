@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ritual — Habit Tracker</title>
+
+  <!-- Google Fonts: Sora for headings (bold/geometric), Inter for body text -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Our own stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Decorative blurry background blobs (pure CSS, purely visual) -->
+  <div class="bg-blob blob-1"></div>
+  <div class="bg-blob blob-2"></div>
+  <div class="bg-blob blob-3"></div>
+
+  <div class="app">
+
+    <!-- ============ HEADER ============ -->
+    <header class="app-header">
+      <div class="brand">
+        <span class="brand-mark">◎</span>
+        <div>
+          <h1>Ritual</h1>
+          <p class="tagline">Small habits, repeated daily.</p>
+        </div>
+      </div>
+
+      <!-- Dark mode toggle switch -->
+      <button id="themeToggle" class="theme-toggle" title="Toggle dark / light mode" aria-label="Toggle theme">
+        <span class="theme-icon" id="themeIcon">🌙</span>
+      </button>
+    </header>
+
+    <!-- ============ DAILY PROGRESS CARD ============ -->
+    <section class="glass progress-card">
+      <div class="progress-ring-wrap">
+        <!-- SVG ring showing % of habits completed today -->
+        <svg class="progress-ring" viewBox="0 0 120 120">
+          <circle class="ring-track" cx="60" cy="60" r="52" />
+          <circle class="ring-fill" id="ringFill" cx="60" cy="60" r="52" />
+        </svg>
+        <div class="ring-label">
+          <span id="ringPercent">0%</span>
+          <small>today</small>
+        </div>
+      </div>
+
+      <div class="progress-info">
+        <h2>Today's Progress</h2>
+        <p id="progressText">No habits yet — add your first one!</p>
+
+        <!-- Linear progress bar (also required by spec) -->
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="progressBarFill"></div>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat-pill">
+            <strong id="statTotal">0</strong>
+            <span>Habits</span>
+          </div>
+          <div class="stat-pill">
+            <strong id="statDone">0</strong>
+            <span>Done</span>
+          </div>
+          <div class="stat-pill">
+            <strong id="statStreak">0</strong>
+            <span>🔥 Best streak</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ ADD HABIT FORM ============ -->
+    <section class="glass add-habit-card">
+      <form id="habitForm" class="habit-form">
+        <input
+          type="text"
+          id="habitInput"
+          class="habit-input"
+          placeholder="e.g. Drink 2L of water"
+          maxlength="60"
+          autocomplete="off"
+        />
+        <select id="habitIcon" class="habit-icon-select" title="Pick an icon">
+          <option value="✅">✅ General</option>
+          <option value="💧">💧 Water</option>
+          <option value="📚">📚 Reading</option>
+          <option value="🏃">🏃 Exercise</option>
+          <option value="🧘">🧘 Mindfulness</option>
+          <option value="🥗">🥗 Nutrition</option>
+          <option value="😴">😴 Sleep</option>
+          <option value="🎯">🎯 Focus</option>
+        </select>
+        <button type="submit" class="btn-primary">
+          <span id="submitLabel">Add Habit</span>
+        </button>
+      </form>
+    </section>
+
+    <!-- ============ HABIT LIST ============ -->
+    <section class="habit-list-section">
+      <div class="list-header">
+        <h2>Your Habits</h2>
+        <div class="filter-tabs" id="filterTabs">
+          <button class="filter-tab active" data-filter="all">All</button>
+          <button class="filter-tab" data-filter="active">Active</button>
+          <button class="filter-tab" data-filter="completed">Completed</button>
+        </div>
+      </div>
+
+      <!-- Habits get injected here by JavaScript -->
+      <ul id="habitList" class="habit-list"></ul>
+
+      <!-- Shown when there are no habits (or none match filter) -->
+      <div id="emptyState" class="empty-state">
+        <div class="empty-emoji">🌱</div>
+        <h3>Nothing here yet</h3>
+        <p>Add a habit above to start building your streak.</p>
+      </div>
+    </section>
+
+    <footer class="app-footer">
+      <p>Data is saved locally in your browser. Nothing leaves your device.</p>
+    </footer>
+  </div>
+
+  <!-- ============ EDIT MODAL ============ -->
+  <div id="editModal" class="modal-overlay">
+    <div class="glass modal-box">
+      <h3>Edit Habit</h3>
+      <input type="text" id="editInput" class="habit-input" maxlength="60" />
+      <select id="editIcon" class="habit-icon-select">
+        <option value="✅">✅ General</option>
+        <option value="💧">💧 Water</option>
+        <option value="📚">📚 Reading</option>
+        <option value="🏃">🏃 Exercise</option>
+        <option value="🧘">🧘 Mindfulness</option>
+        <option value="🥗">🥗 Nutrition</option>
+        <option value="😴">😴 Sleep</option>
+        <option value="🎯">🎯 Focus</option>
+      </select>
+      <div class="modal-actions">
+        <button id="cancelEdit" class="btn-secondary">Cancel</button>
+        <button id="saveEdit" class="btn-primary">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TOAST NOTIFICATION CONTAINER ============ -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Our own script -->
+  <script src="script.js"></script>
+</body>
+</html>
