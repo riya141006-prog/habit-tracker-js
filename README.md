@@ -1,1 +1,1 @@
-# habit-tracker-js
+Ritual the habit tracking app
